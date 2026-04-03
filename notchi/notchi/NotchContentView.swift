@@ -272,7 +272,7 @@ struct NotchContentView: View {
     @ViewBuilder
     private var headerSprites: some View {
         let topSession = sessionStore.sortedSessions.first
-        TimelineView(.animation(minimumInterval: 1.0 / 30, paused: !allSessionsAwaitingInput)) { timeline in
+        TimelineView(.animation(minimumInterval: 1.0 / 8, paused: !allSessionsAwaitingInput)) { timeline in
             SessionSpriteView(
                 state: topSession?.state ?? .idle,
                 isSelected: true

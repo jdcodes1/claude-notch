@@ -193,7 +193,7 @@ private struct GrassSpriteView: View {
     }
 
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 30, paused: !isAnimatingMotion)) { timeline in
+        TimelineView(.animation(minimumInterval: 1.0 / 10, paused: !isAnimatingMotion)) { timeline in
             SpriteSheetView(
                 spriteSheet: state.spriteSheetName,
                 frameCount: state.frameCount,
