@@ -13,7 +13,7 @@ final class NotchiStateMachineTests: XCTestCase {
 
     func testAssistantMessagesWakeIdleAndSleepingInteractiveSessionsWithActiveWatcher() {
         let stateMachine = NotchiStateMachine.shared
-        let result = ParseResult(messages: [makeAssistantMessage()], interrupted: false)
+        let result = ParseResult(messages: [makeAssistantMessage()], interrupted: false, tokenUsage: [])
 
         for initialTask in [NotchiTask.idle, .sleeping] {
             let sessionId = "wake-\(initialTask.rawValue)-\(UUID().uuidString)"
@@ -39,7 +39,7 @@ final class NotchiStateMachineTests: XCTestCase {
         XCTAssertEqual(session.task, .idle)
         XCTAssertFalse(session.isProcessing)
 
-        let result = ParseResult(messages: [makeAssistantMessage()], interrupted: false)
+        let result = ParseResult(messages: [makeAssistantMessage()], interrupted: false, tokenUsage: [])
         SessionStore.shared.recordAssistantMessages(result.messages, for: sessionId)
         stateMachine.reconcileFileSyncResult(result, for: sessionId, hasActiveWatcher: false)
 

@@ -90,7 +90,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "ln -sfn \"${BUILT_PRODUCTS_DIR}/notchi.app\" \"$HOME/.local/bin/notchi.app\"\n";
+			shellScript = "mkdir -p \"$HOME/.local/bin\" && ln -sfn \"${BUILT_PRODUCTS_DIR}/notchi.app\" \"$HOME/.local/bin/notchi.app\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
