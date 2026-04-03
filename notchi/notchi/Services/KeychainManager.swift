@@ -13,7 +13,7 @@ struct ClaudeOAuthCredentials: Equatable {
 enum KeychainManager {
     private static let claudeCodeService = "Claude Code-credentials"
     private static let notchiService = "com.ruban.notchi"
-    private static let anthropicApiKeyAccount = "anthropicApiKey"
+
     private static let cachedOAuthTokenAccount = "cachedOAuthToken"
     private static let recentCredentialCacheTTL: TimeInterval = 5
     private static let securityCLIBackoffInterval: TimeInterval = 60
@@ -47,23 +47,6 @@ enum KeychainManager {
         return credentials.accessToken
     }
 
-    // MARK: - Anthropic API Key
-
-    static func getAnthropicApiKey(allowInteraction: Bool = false) -> String? {
-        readString(
-            service: notchiService,
-            account: anthropicApiKeyAccount,
-            allowInteraction: allowInteraction
-        )
-    }
-
-    static func setAnthropicApiKey(_ key: String?) {
-        if let key, !key.isEmpty {
-            saveString(key, service: notchiService, account: anthropicApiKeyAccount)
-        } else {
-            deleteItem(service: notchiService, account: anthropicApiKeyAccount)
-        }
-    }
 
     // MARK: - Cached OAuth Token
 

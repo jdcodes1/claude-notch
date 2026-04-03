@@ -62,13 +62,8 @@ struct ExpandedPanelView: View {
         GeometryReader { geometry in
             ZStack {
                 if !showingSettings {
-                    if shouldShowSessionPicker {
-                        sessionPickerContent(geometry: geometry)
-                            .transition(.move(edge: .leading).combined(with: .opacity))
-                    } else {
-                        activityContent(geometry: geometry)
-                            .transition(.move(edge: .leading).combined(with: .opacity))
-                    }
+                    sessionPickerContent(geometry: geometry)
+                        .transition(.move(edge: .leading).combined(with: .opacity))
                 }
 
                 if showingSettings {
@@ -79,7 +74,6 @@ struct ExpandedPanelView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: showingSettings)
-        .animation(.easeInOut(duration: 0.25), value: shouldShowSessionPicker)
         .onChange(of: showingSettings) { _, isShowing in
             if !isShowing {
                 UpdateManager.shared.clearTransientStatus()
@@ -106,10 +100,7 @@ struct ExpandedPanelView: View {
                     SessionListView(
                         sessions: sessionStore.sortedSessions,
                         selectedSessionId: sessionStore.selectedSessionId,
-                        onSelectSession: { sessionId in
-                            sessionStore.selectSession(sessionId)
-                            showingSessionActivity = true
-                        },
+                        onSelectSession: { _ in },
                         onDeleteSession: { sessionId in
                             sessionStore.dismissSession(sessionId)
                         }

@@ -21,12 +21,10 @@ struct SessionRowView: View {
                         .foregroundColor(TerminalColors.primaryText)
                         .lineLimit(1)
 
-                    if let preview = session.activityPreview {
-                        Text(preview)
-                            .font(.system(size: 10))
-                            .foregroundColor(TerminalColors.dimmedText)
-                            .lineLimit(1)
-                    }
+                    Text(session.projectName)
+                        .font(.system(size: 10))
+                        .foregroundColor(TerminalColors.dimmedText)
+                        .lineLimit(1)
                 }
 
                 Spacer()

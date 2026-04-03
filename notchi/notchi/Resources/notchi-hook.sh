@@ -53,6 +53,21 @@ output = {
     'permission_mode': input_data.get('permission_mode', 'default')
 }
 
+# On SessionStart or first UserPromptSubmit, resolve the Ghostty window title
+# At these times, the window that launched claude is likely still focused
+if hook_event in ('SessionStart', 'UserPromptSubmit'):
+    try:
+        import subprocess
+        result = subprocess.run(
+            ['osascript', '-e', 'tell application \"System Events\" to tell process \"ghostty\" to return name of front window'],
+            capture_output=True, text=True, timeout=3
+        )
+        title = result.stdout.strip()
+        if title:
+            output['window_title'] = title
+    except:
+        pass
+
 # Pass user prompt directly for UserPromptSubmit
 if hook_event == 'UserPromptSubmit':
     prompt = input_data.get('prompt', '')

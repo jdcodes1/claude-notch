@@ -13,6 +13,7 @@ struct HookEvent: Decodable, Sendable {
     let userPrompt: String?
     let permissionMode: String?
     let interactive: Bool?
+    let windowTitle: String?
 
     enum CodingKeys: String, CodingKey {
         case sessionId = "session_id"
@@ -22,6 +23,7 @@ struct HookEvent: Decodable, Sendable {
         case userPrompt = "user_prompt"
         case permissionMode = "permission_mode"
         case interactive
+        case windowTitle = "window_title"
     }
 }
 

@@ -21,9 +21,9 @@ final class SessionData: Identifiable {
     let isInteractive: Bool
 
     private(set) var task: NotchiTask = .idle
-    let emotionState = EmotionState()
+    private(set) var windowTitle: String?
     var state: NotchiState {
-        NotchiState(task: task, emotion: emotionState.currentEmotion)
+        NotchiState(task: task)
     }
     private(set) var isProcessing: Bool = false
     private(set) var lastActivity: Date
@@ -57,11 +57,11 @@ final class SessionData: Identifiable {
     }
 
     var displayTitle: String {
-        let title = "\(projectName) #\(sessionNumber)"
-        if let prompt = lastUserPrompt {
-            return "\(title) - \(prompt)"
-        }
-        return title
+        windowTitle ?? lastUserPrompt ?? projectName
+    }
+
+    func updateWindowTitle(_ title: String) {
+        windowTitle = title
     }
 
     var activityPreview: String? {

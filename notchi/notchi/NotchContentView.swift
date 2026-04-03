@@ -67,8 +67,7 @@ struct NotchContentView: View {
     }
 
     private var shouldShowBackButton: Bool {
-        showingPanelSettings ||
-        (sessionStore.activeSessionCount >= 2 && showingSessionActivity)
+        showingPanelSettings
     }
 
     private var expandedPanelHeight: CGFloat {
@@ -85,7 +84,19 @@ struct NotchContentView: View {
         .padding(.bottom, isExpanded ? 12 : 0)
         .background {
             ZStack(alignment: .top) {
-                Color.black
+                if isExpanded {
+                    Color.black
+                } else {
+                    RadialGradient(
+                        stops: [
+                            .init(color: .black, location: 0),
+                            .init(color: .black.opacity(0), location: 0.55)
+                        ],
+                        center: .center,
+                        startRadius: 0,
+                        endRadius: 120
+                    )
+                }
                 GrassIslandView(sessions: sessionStore.sortedSessions, selectedSessionId: sessionStore.selectedSessionId, hoveredSessionId: hoveredSessionId)
                     .frame(height: grassHeight, alignment: .bottom)
                     .opacity(isExpanded && !showingPanelSettings ? 1 : 0)

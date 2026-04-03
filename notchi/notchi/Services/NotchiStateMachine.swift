@@ -10,7 +10,6 @@ final class NotchiStateMachine {
 
     let sessionStore = SessionStore.shared
 
-    private var emotionDecayTimer: Task<Void, Never>?
     private var pendingSyncTasks: [String: Task<Void, Never>] = [:]
     private var pendingPositionMarks: [String: Task<Void, Never>] = [:]
     private var fileWatchers: [String: (source: DispatchSourceFileSystemObject, fd: Int32)] = [:]
@@ -26,12 +25,17 @@ final class NotchiStateMachine {
     }
 
     private init() {
-        startEmotionDecayTimer()
+
     }
 
     func handleEvent(_ event: HookEvent) {
         let session = sessionStore.process(event)
         let isDone = event.status == "waiting_for_input"
+
+        // Store window title from SessionStart hook event
+        if session.windowTitle == nil, let title = event.windowTitle, !title.isEmpty {
+            session.updateWindowTitle(title)
+        }
 
         switch event.event {
         case "UserPromptSubmit":
@@ -43,13 +47,6 @@ final class NotchiStateMachine {
             }
             if session.isInteractive {
                 startFileWatcher(sessionId: event.sessionId, cwd: event.cwd)
-            }
-
-            if session.isInteractive, let prompt = event.userPrompt {
-                Task {
-                    let result = await EmotionAnalyzer.shared.analyze(prompt)
-                    session.emotionState.recordEmotion(result.emotion, intensity: result.intensity, prompt: prompt)
-                }
             }
 
             if session.isInteractive, !SessionStore.isLocalSlashCommand(event.userPrompt) {
@@ -180,17 +177,6 @@ final class NotchiStateMachine {
         logger.debug("Stopped file watcher for session \(sessionId)")
     }
 
-    private func startEmotionDecayTimer() {
-        emotionDecayTimer = Task {
-            while !Task.isCancelled {
-                try? await Task.sleep(for: EmotionState.decayInterval)
-                guard !Task.isCancelled else { return }
-                for session in sessionStore.sessions.values {
-                    session.emotionState.decayAll()
-                }
-            }
-        }
-    }
 
     func resetTestingHooks() {
         handleClaudeUsageResumeTrigger = { trigger in
