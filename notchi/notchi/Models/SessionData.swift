@@ -22,6 +22,9 @@ final class SessionData: Identifiable {
 
     private(set) var task: NotchiTask = .idle
     private(set) var windowTitle: String?
+    private(set) var totalInputTokens: Int = 0
+    private(set) var totalOutputTokens: Int = 0
+    private(set) var totalCacheReadTokens: Int = 0
     var state: NotchiState {
         NotchiState(task: task)
     }
@@ -62,6 +65,23 @@ final class SessionData: Identifiable {
 
     func updateWindowTitle(_ title: String) {
         windowTitle = title
+    }
+
+    var formattedTokenCount: String {
+        let total = totalInputTokens + totalOutputTokens + totalCacheReadTokens
+        if total == 0 { return "" }
+        if total >= 1_000_000 {
+            return String(format: "%.1fM tokens", Double(total) / 1_000_000)
+        } else if total >= 1_000 {
+            return String(format: "%.1fK tokens", Double(total) / 1_000)
+        }
+        return "\(total) tokens"
+    }
+
+    func addTokenUsage(input: Int, output: Int, cacheRead: Int) {
+        totalInputTokens += input
+        totalOutputTokens += output
+        totalCacheReadTokens += cacheRead
     }
 
     var activityPreview: String? {

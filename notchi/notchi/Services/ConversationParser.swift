@@ -8,9 +8,16 @@
 
 import Foundation
 
+struct TokenUsage {
+    let inputTokens: Int
+    let outputTokens: Int
+    let cacheReadTokens: Int
+}
+
 struct ParseResult {
     let messages: [AssistantMessage]
     let interrupted: Bool
+    let tokenUsage: [TokenUsage]
 }
 
 actor ConversationParser {
@@ -19,7 +26,7 @@ actor ConversationParser {
     private var lastFileOffset: [String: UInt64] = [:]
     private var seenMessageIds: [String: Set<String>] = [:]
 
-    private static let emptyResult = ParseResult(messages: [], interrupted: false)
+    private static let emptyResult = ParseResult(messages: [], interrupted: false, tokenUsage: [])
 
     /// Parse only NEW assistant text messages since last call
     func parseIncremental(sessionId: String, cwd: String) -> ParseResult {
@@ -66,6 +73,7 @@ actor ConversationParser {
         }
 
         var messages: [AssistantMessage] = []
+        var tokenUsages: [TokenUsage] = []
         var interrupted = false
         var seen = seenMessageIds[sessionId] ?? []
         let lines = newContent.components(separatedBy: "\n")
@@ -93,6 +101,14 @@ actor ConversationParser {
             if json["isMeta"] as? Bool == true { continue }
 
             guard let messageDict = json["message"] as? [String: Any] else { continue }
+
+            // Extract token usage
+            if let usage = messageDict["usage"] as? [String: Any] {
+                let input = usage["input_tokens"] as? Int ?? 0
+                let output = usage["output_tokens"] as? Int ?? 0
+                let cacheRead = usage["cache_read_input_tokens"] as? Int ?? 0
+                tokenUsages.append(TokenUsage(inputTokens: input, outputTokens: output, cacheReadTokens: cacheRead))
+            }
 
             // Parse timestamp
             let timestamp: Date
@@ -144,7 +160,7 @@ actor ConversationParser {
         lastFileOffset[sessionId] = fileSize
         seenMessageIds[sessionId] = seen
 
-        return ParseResult(messages: messages, interrupted: interrupted)
+        return ParseResult(messages: messages, interrupted: interrupted, tokenUsage: tokenUsages)
     }
 
     /// Reset parsing state for a session

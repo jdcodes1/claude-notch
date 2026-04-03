@@ -23,6 +23,10 @@ struct GrassIslandView: View {
     var selectedSessionId: String?
     var hoveredSessionId: String?
 
+    private var allAwaitingInput: Bool {
+        !sessions.isEmpty && sessions.allSatisfy { $0.task == .idle || $0.task == .waiting }
+    }
+
     private let patchWidth: CGFloat = 80
 
     var body: some View {
@@ -41,7 +45,7 @@ struct GrassIslandView: View {
                 .drawingGroup()
 
                 if sessions.isEmpty {
-                    GrassSpriteView(state: .idle, xPosition: 0.5, yOffset: -15, totalWidth: geometry.size.width, glowOpacity: 0)
+                    GrassSpriteView(state: .idle, xPosition: 0.5, yOffset: -15, totalWidth: geometry.size.width, glowOpacity: 0, rainbowEnabled: false)
                 } else {
                     ForEach(SpriteLayout.depthSorted(sessions)) { session in
                         GrassSpriteView(
@@ -49,7 +53,8 @@ struct GrassIslandView: View {
                             xPosition: session.spriteXPosition,
                             yOffset: session.spriteYOffset,
                             totalWidth: geometry.size.width,
-                            glowOpacity: glowOpacity(for: session.id)
+                            glowOpacity: glowOpacity(for: session.id),
+                            rainbowEnabled: allAwaitingInput
                         )
                     }
                 }
@@ -150,7 +155,9 @@ private struct GrassSpriteView: View {
     let yOffset: CGFloat
     let totalWidth: CGFloat
     var glowOpacity: Double = 0
+    var rainbowEnabled: Bool = false
 
+    private static let rainbowCycleDuration: Double = 3.0
     private let swayDuration: Double = 2.0
     private var bobAmplitude: CGFloat {
         guard state.bobAmplitude > 0 else { return 0 }
@@ -163,7 +170,7 @@ private struct GrassSpriteView: View {
     }
 
     private var isAnimatingMotion: Bool {
-        bobAmplitude > 0 || swayAmplitude > 0 || state.emotion == .sob
+        bobAmplitude > 0 || swayAmplitude > 0 || state.emotion == .sob || rainbowEnabled
     }
 
     private var bobDuration: Double {
@@ -179,6 +186,12 @@ private struct GrassSpriteView: View {
 
     private static let sobTrembleAmplitude: CGFloat = 0.3
 
+    private func rainbowHue(at date: Date) -> Double {
+        let t = date.timeIntervalSinceReferenceDate
+        let phase = (t / Self.rainbowCycleDuration).truncatingRemainder(dividingBy: 1.0)
+        return phase * 360
+    }
+
     var body: some View {
         TimelineView(.animation(minimumInterval: 1.0 / 30, paused: !isAnimatingMotion)) { timeline in
             SpriteSheetView(
@@ -189,6 +202,7 @@ private struct GrassSpriteView: View {
                 isAnimating: true
             )
             .frame(width: SpriteLayout.size, height: SpriteLayout.size)
+            .hueRotation(.degrees(rainbowEnabled ? rainbowHue(at: timeline.date) : 0))
             .background(alignment: .bottom) {
                 if glowOpacity > 0 {
                     Ellipse()

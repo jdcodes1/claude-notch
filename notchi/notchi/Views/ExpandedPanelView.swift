@@ -58,6 +58,18 @@ struct ExpandedPanelView: View {
         sessionStore.activeSessionCount >= 2 && !showingSessionActivity
     }
 
+    private func focusGhosttyWindow(titled title: String) {
+        let escaped = title.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"")
+        let script = "tell application \"System Events\" to tell process \"ghostty\"\nset frontmost to true\nrepeat with w in windows\nif name of w is \"\(escaped)\" then\nperform action \"AXRaise\" of w\nreturn true\nend if\nend repeat\nend tell"
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
+        process.arguments = ["-e", script]
+        process.standardOutput = FileHandle.nullDevice
+        process.standardError = FileHandle.nullDevice
+        try? process.run()
+        NotificationCenter.default.post(name: .notchiShouldCollapse, object: nil)
+    }
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -100,7 +112,12 @@ struct ExpandedPanelView: View {
                     SessionListView(
                         sessions: sessionStore.sortedSessions,
                         selectedSessionId: sessionStore.selectedSessionId,
-                        onSelectSession: { _ in },
+                        onSelectSession: { sessionId in
+                            if let session = sessionStore.sessions[sessionId],
+                               let title = session.windowTitle {
+                                focusGhosttyWindow(titled: title)
+                            }
+                        },
                         onDeleteSession: { sessionId in
                             sessionStore.dismissSession(sessionId)
                         }

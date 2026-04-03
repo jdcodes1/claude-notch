@@ -264,13 +264,26 @@ struct NotchContentView: View {
         }
     }
 
+    private var allSessionsAwaitingInput: Bool {
+        let sessions = sessionStore.sortedSessions
+        return !sessions.isEmpty && sessions.allSatisfy { $0.task == .idle || $0.task == .waiting }
+    }
+
     @ViewBuilder
     private var headerSprites: some View {
         let topSession = sessionStore.sortedSessions.first
-        SessionSpriteView(
-            state: topSession?.state ?? .idle,
-            isSelected: true
-        )
+        TimelineView(.animation(minimumInterval: 1.0 / 30, paused: !allSessionsAwaitingInput)) { timeline in
+            SessionSpriteView(
+                state: topSession?.state ?? .idle,
+                isSelected: true
+            )
+            .hueRotation(.degrees(allSessionsAwaitingInput ? headerRainbowHue(at: timeline.date) : 0))
+        }
+    }
+
+    private func headerRainbowHue(at date: Date) -> Double {
+        let phase = (date.timeIntervalSinceReferenceDate / 3.0).truncatingRemainder(dividingBy: 1.0)
+        return phase * 360
     }
 
     private func toggleMute() {

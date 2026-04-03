@@ -110,6 +110,15 @@ final class NotchiStateMachine {
                 sessionStore.recordAssistantMessages(result.messages, for: sessionId)
             }
 
+            // Accumulate token usage
+            for usage in result.tokenUsage {
+                sessionStore.sessions[sessionId]?.addTokenUsage(
+                    input: usage.inputTokens,
+                    output: usage.outputTokens,
+                    cacheRead: usage.cacheReadTokens
+                )
+            }
+
             reconcileFileSyncResult(
                 result,
                 for: sessionId,
