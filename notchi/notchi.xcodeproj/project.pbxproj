@@ -77,6 +77,23 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		AABB00012F60000000000001 /* Update Symlink */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Update Symlink";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "ln -sfn \"${BUILT_PRODUCTS_DIR}/notchi.app\" \"$HOME/.local/bin/notchi.app\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXNativeTarget section */
 		47C922812F2CFA1F00EA1E18 /* notchi */ = {
 			isa = PBXNativeTarget;
@@ -85,6 +102,7 @@
 				47C9227E2F2CFA1F00EA1E18 /* Sources */,
 				47C9227F2F2CFA1F00EA1E18 /* Frameworks */,
 				47C922802F2CFA1F00EA1E18 /* Resources */,
+				AABB00012F60000000000001 /* Update Symlink */,
 			);
 			buildRules = (
 			);
